@@ -1,17 +1,15 @@
-# Use the most stable LTS version
 FROM node:lts-slim
 
 WORKDIR /app
 
-# Copy only package files first to leverage Docker cache
+# Copy package files
 COPY package*.json ./
 
-# Use 'npm ci' instead of 'npm install'
-# 'npm ci' is designed specifically for automated environments (Continuous Integration)
-# It is faster, more reliable, and less memory-intensive
-RUN npm ci --omit=dev
+# The 'Forgiving' Install:
+# --no-package-lock: Don't worry if the lock file is missing or mismatched
+# --no-audit / --no-fund: Skip the extra network checks that cause timeouts
+RUN npm install --omit=dev --no-package-lock --no-audit --no-fund
 
-# Copy the rest of the application
 COPY . .
 
 EXPOSE 3000
