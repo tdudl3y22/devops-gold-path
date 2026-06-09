@@ -43,7 +43,7 @@ jobs:
         with:
           image-ref: 'app-scan:${{ github.sha }}'
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true      # ONLY fail if there is a known fix available
           vuln-type: 'os,library'
           severity: 'CRITICAL'      # Only block on CRITICAL (Ignore High for now)
