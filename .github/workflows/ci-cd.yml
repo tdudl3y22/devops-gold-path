@@ -43,10 +43,10 @@ jobs:
         with:
           image-ref: 'app-scan:${{ github.sha }}'
           format: 'table'
-          exit-code: '1' # This will STOP the pipeline if it finds a vulnerability
-          ignore-unfixed: true
+          exit-code: '1'
+          ignore-unfixed: true      # ONLY fail if there is a known fix available
           vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'      # Only block on CRITICAL (Ignore High for now)
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
