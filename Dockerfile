@@ -1,20 +1,20 @@
-FROM node:18-alpine
+# Switching to 'slim' - still small, but more stable than alpine for networking
+FROM node:18-slim
 
-# Set working directory
+# Install essential build tools (sometimes needed for npm installs)
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with a clean slate
-# --no-audit and --no-fund speed things up and reduce network noise
-RUN npm install --omit=dev --no-audit --no-fund
+# Standard install
+RUN npm install --omit=dev
 
-# Copy the rest of your code
+# Copy the rest
 COPY . .
 
-# Expose the port
 EXPOSE 3000
 
-# Start the app
 CMD ["node", "index.js"]
