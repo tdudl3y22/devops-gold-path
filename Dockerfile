@@ -1,19 +1,18 @@
 FROM node:lts-slim
 
-# Step 1: Tell Node.js to stay under 2GB of memory (Prevents Exit 254)
+# Force memory limits to prevent the 254 error
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 WORKDIR /app
 
-# Step 2: Copy ONLY package.json (skip the lock file entirely for now)
-COPY package.json ./
+# The "Wildcard" Copy: This looks for any file starting with 'package' and ends with '.json'
+# This handles package.json and package-lock.json if it exists
+COPY package*.json ./
 
-# Step 3: Run the lightest possible install
-# --prefer-offline: Uses local cache if possible to save network/memory
-# --no-bin-links: Skips creating symlinks (saves disk I/O)
-RUN npm install --omit=dev --no-audit --no-fund --prefer-offline --no-bin-links
+# The Lightest Install
+RUN npm install --omit=dev --no-audit --no-fund --prefer-offline
 
-# Step 4: Copy the rest of the app
+# Copy everything else
 COPY . .
 
 EXPOSE 3000
