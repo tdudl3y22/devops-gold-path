@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD and IaC Pipeline
 
 on:
   push:
@@ -7,7 +7,25 @@ on:
     branches: [ "main" ]
 
 jobs:
+  terraform-validate:
+    name: Terraform Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
   build-and-deploy:
+    name: Docker Build & Deploy
+    needs: terraform-validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -28,10 +46,9 @@ jobs:
         with:
           context: .
           push: true
+          # Note: Hardcoded lowercase username to avoid registry errors
           tags: ghcr.io/tdudl3y22/devops-gold-path/app:latest
 
-      # Example: Deploy to Render via Deploy Hook
-      # You would add your Render Deploy Hook URL to your GitHub Secrets
-      - name: Deploy to Production
+      - name: Deploy to Render
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
