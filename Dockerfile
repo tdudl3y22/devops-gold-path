@@ -1,18 +1,17 @@
-# Switching to 'slim' - still small, but more stable than alpine for networking
-FROM node:18-slim
-
-# Install essential build tools (sometimes needed for npm installs)
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+# Use the most stable LTS version
+FROM node:lts-slim
 
 WORKDIR /app
 
-# Copy package files
+# Copy only package files first to leverage Docker cache
 COPY package*.json ./
 
-# Standard install
-RUN npm install --omit=dev
+# Use 'npm ci' instead of 'npm install'
+# 'npm ci' is designed specifically for automated environments (Continuous Integration)
+# It is faster, more reliable, and less memory-intensive
+RUN npm ci --omit=dev
 
-# Copy the rest
+# Copy the rest of the application
 COPY . .
 
 EXPOSE 3000
