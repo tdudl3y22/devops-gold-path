@@ -18,6 +18,11 @@ Hosting: Render
 🛡 Security Policy
 This project implements a "Zero Critical" policy. Every build is scanned for vulnerabilities; images containing unpatched CRITICAL flaws are automatically blocked from entering the production registry.
 
+🚦 Getting Started
+Clone the repo: git clone https://github.com/tdudl3y22/devops-gold-path
+Run terraform init to check infrastructure blueprints.
+Push to main to trigger the automated build-scan-deploy sequence.
+
 ## 🏗 System Architecture
 
 ```mermaid
