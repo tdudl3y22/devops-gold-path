@@ -24,3 +24,19 @@ graph TD
     style E fill:#f96,stroke:#333,stroke-width:2px
     style G fill:#bbf,stroke:#333,stroke-width:2px
     style I fill:#9f9,stroke:#333,stroke-width:2px
+
+🚀 Features
+Infrastructure as Code: Managed via Terraform for consistent, reproducible environments.
+Containerization: Node.js application hardened with slim base images.
+DevSecOps: Integrated Trivy scanning to block CRITICAL vulnerabilities before deployment.
+Automated Deployment: Continuous Deployment (CD) to Render via secure webhooks.
+Private Registry: Hosted on GitHub Container Registry (GHCR) using ephemeral GITHUB_TOKENs.
+🛠 Tech Stack
+Language: Node.js (Express)
+Infrastructure: Terraform
+CI/CD: GitHub Actions
+Security: Trivy
+Container: Docker
+Hosting: Render
+🛡 Security Policy
+This project implements a "Zero Critical" policy. Every build is scanned for vulnerabilities; images containing unpatched CRITICAL flaws are automatically blocked from entering the production registry.
