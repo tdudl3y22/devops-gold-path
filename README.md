@@ -1,49 +1,48 @@
-# DevOps Gold Path: Automated DevSecOps Pipeline
+# DevOps Gold Path: Production-Grade Node.js 🚀
 
-A high-performance, automated CI/CD pipeline demonstrating modern Infrastructure-as-Code (IaC), Containerization, and "Shift-Left" Security principles.
+A high-availability, security-hardened Node.js application pipeline. This project demonstrates industry-standard DevOps practices, moving from a simple container to a self-healing, multi-stage production environment.
 
-🚀 Features
-Infrastructure as Code: Managed via Terraform for consistent, reproducible environments.
-Containerization: Node.js application hardened with slim base images.
-DevSecOps: Integrated Trivy scanning to block CRITICAL vulnerabilities before deployment.
-Automated Deployment: Continuous Deployment (CD) to Render via secure webhooks.
-Private Registry: Hosted on GitHub Container Registry (GHCR) using ephemeral GITHUB_TOKENs.
-🛠 Tech Stack
-Language: Node.js (Express)
-Infrastructure: Terraform
-CI/CD: GitHub Actions
-Security: Trivy
-Container: Docker
-Hosting: Render
-🛡 Security Policy
-This project implements a "Zero Critical" policy. Every build is scanned for vulnerabilities; images containing unpatched CRITICAL flaws are automatically blocked from entering the production registry.
+## 🏗 Architecture Overview
 
-🚦 Getting Started
-Clone the repo: git clone https://github.com/tdudl3y22/devops-gold-path
-Run terraform init to check infrastructure blueprints.
-Push to main to trigger the automated build-scan-deploy sequence.
+This project utilizes a **Multi-Stage Docker Build** to minimize attack surface and optimize deployment speed.
 
-## 🏗 System Architecture
+🛡 Security & Hardening
+Trivy Vulnerability Scanning: Integrated into the CI/CD pipeline to block any image with CRITICAL vulnerabilities.
+OS Patching: The Dockerfile manually upgrades libgnutls30 and other critical libraries during the build.
+Multi-Stage Builds: Removes npm cache and build tools from the final production image.
+🩺 Self-Healing & Reliability
+The container includes a native Healthcheck that monitors the application's responsiveness every 30 seconds.
+
+Liveness Probe: curl -f http://localhost:3000/
+Auto-Recovery: Integrated with cloud platforms (like Render) to automatically reboot the container if the app becomes unresponsive.
+⚡ Technical Specifications
+Base Image: node:lts-slim (Debian-based)
+Memory Limit: --max-old-space-size=2048 (Hardened against Exit 254 errors)
+Port: 3000 (Exposed & Mapped)
+🛠 Local Development
+To run this project locally with full health monitoring:
+# Build the production image
+docker build -t devops-gold-path:pro .
+
+# Run with port mapping
+docker run -d -p 3000:3000 --name web-app devops-gold-path:pro
+
+# Monitor health status
+docker ps
+
+
 
 ```mermaid
 graph TD
-    A[Local Code / main.tf] -->|Git Push| B(GitHub Actions)
-    
-    subgraph "CI/CD Pipeline"
-    B --> C{Terraform Check}
-    C -->|Success| D[Docker Build]
-    D --> E{Trivy Security Scan}
-    E -->|Green Light| F[Login to GHCR]
-    F --> G[Push Image to GHCR]
+    subgraph Build_Stage [Stage 1: The Builder]
+        A[node:lts-slim] --> B[Security Patching: apt upgrade]
+        B --> C[npm install: production only]
     end
-    
-    subgraph "Production"
-    G --> H[Render Deploy Hook]
-    H --> I[Running Web Service]
+
+    subgraph Run_Stage [Stage 2: The Runner]
+        D[node:lts-slim] --> E[Install curl for Healthchecks]
+        E --> F[COPY --from=builder /app]
+        F --> G[Liveness Probe: HEALTHCHECK]
     end
-    
-    style E fill:#f96,stroke:#333,stroke-width:2px
-    style G fill:#bbf,stroke:#333,stroke-width:2px
-    style I fill:#9f9,stroke:#333,stroke-width:2px
 
-
+    C -- "Copy cleaned app only" --> F
