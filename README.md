@@ -50,6 +50,7 @@ To ensure the environment is reproducible and "vendor-neutral," the infrastructu
 - **Shifting Left:** Security scanning (Trivy) happens at the earliest possible stage in the CI/CD pipeline.
 - **GitOps:** The Git repository is the "Single Source of Truth" for both the application code and the server configuration.
 
+Note: This projeect does not require piad cloud accounts (AWS/Azure/GCP) and is designed to demonstrate architecture and automation patterns in a free or local environment. 
 
 ```mermaid
 graph TD
