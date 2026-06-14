@@ -1,33 +1,28 @@
 # --- STAGE 1: Build Stage ---
 FROM node:lts-slim AS builder
-
-# Security Patch & Dependencies
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
-
-# Copy and Install
 COPY package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
-
-# Copy the rest of the app
 COPY . .
 
-
 # --- STAGE 2: Run Stage ---
-# We start FRESH here. Everything from the "builder" stage is thrown away 
-# unless we explicitly COPY it over.
 FROM node:lts-slim
 
-# Re-apply the memory limit for the runner
+# NEW: Install 'curl' so the healthcheck can work
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 WORKDIR /app
-
-# COPY ONLY the necessary pieces from the builder stage
-# This leaves behind the npm cache and temporary build files
 COPY --from=builder /app /app
 
-EXPOSE 3000
+# NEW: The Healthcheck
+# --interval: How often to check (30s)
+# --timeout: How long to wait for a response (3s)
+# --start-period: Give the app 5s to boot up before checking
+# --retries: Try 3 times before calling it "dead"
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
 
-# Using "node index.js" directly is even lighter than "npm start"
+EXPOSE 3000
 CMD ["node", "index.js"]
