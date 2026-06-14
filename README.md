@@ -30,6 +30,25 @@ docker run -d -p 3000:3000 --name web-app devops-gold-path:pro
 # Monitor health status
 docker ps
 
+## 🤖 CI/CD Pipeline (GitHub Actions)
+The project utilizes a fully automated **Continuous Integration and Deployment** pipeline. Every push to the `main` branch triggers a multi-stage validation process:
+
+1. **Lint & Build:** Validates the Dockerfile and builds the "Builder" stage.
+2. **Security Gate (Trivy):** Scans the image for vulnerabilities. The pipeline is configured to **fail the build** if `CRITICAL` issues are detected.
+3. **Registry Push:** Upon a successful scan, the image is tagged and pushed to the **GitHub Container Registry (GHCR)**.
+4. **Automated Deploy:** Sends a webhook to the production environment to trigger a rolling update.
+
+## 🌍 Infrastructure as Code (Terraform)
+To ensure the environment is reproducible and "vendor-neutral," the infrastructure is defined using **Terraform**.
+
+- **Provider:** Managed via standard cloud providers (Render/AWS/OCI).
+- **State Management:** Terraform tracks the current state of the infrastructure, allowing for incremental updates without manual intervention.
+- **Declarative Design:** Instead of clicking buttons in a dashboard, we define the desired state (e.g., "I need a Node.js service with 2GB RAM") and Terraform handles the provisioning.
+
+### Key DevOps Philosophies Applied:
+- **Immutable Infrastructure:** We never "patch" a running server; we use Terraform and Docker to replace it with a fresh, perfect version.
+- **Shifting Left:** Security scanning (Trivy) happens at the earliest possible stage in the CI/CD pipeline.
+- **GitOps:** The Git repository is the "Single Source of Truth" for both the application code and the server configuration.
 
 
 ```mermaid
