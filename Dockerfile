@@ -1,32 +1,33 @@
-# Use the most stable LTS version based on Debian (Slim)
-FROM node:lts-slim
+# --- STAGE 1: Build Stage ---
+FROM node:lts-slim AS builder
 
-# SECURITY PATCH (Added 9:26 PM): 
-# Manually upgrade system libraries to fix CRITICAL vulnerabilities (like libgnutls30)
-# We use '&&' to keep the image small and 'rm -rf' to delete the "grocery flyer" catalog files.
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    rm -rf /var/lib/apt/lists/*
-
-# MEMORY LIMIT (The "Exit 254" Fix):
-# Prevents the GitHub runner from killing the process by capping Node's RAM usage.
-ENV NODE_OPTIONS="--max-old-space-size=2048"
+# Security Patch & Dependencies
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy package files first to leverage Docker's layer caching
+# Copy and Install
 COPY package*.json ./
-
-# THE FORGIVING INSTALL:
-# --omit=dev: Keeps the image light by skipping testing/dev tools
-# --no-audit / --no-fund: Reduces network noise and prevents timeouts
 RUN npm install --omit=dev --no-audit --no-fund
 
-# Copy the rest of the application code
+# Copy the rest of the app
 COPY . .
 
-# Standard port for web services
+
+# --- STAGE 2: Run Stage ---
+# We start FRESH here. Everything from the "builder" stage is thrown away 
+# unless we explicitly COPY it over.
+FROM node:lts-slim
+
+# Re-apply the memory limit for the runner
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+WORKDIR /app
+
+# COPY ONLY the necessary pieces from the builder stage
+# This leaves behind the npm cache and temporary build files
+COPY --from=builder /app /app
+
 EXPOSE 3000
 
-# Start the application using the script defined in package.json
-CMD ["npm", "start"]
+# Using "node index.js" directly is even lighter than "npm start"
+CMD ["node", "index.js"]
