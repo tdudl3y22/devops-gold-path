@@ -29,10 +29,10 @@ resource "docker_container" "aegis_link_test" {
   image = docker_image.nginx.image_id
   name  = "aegis_link_test"
 
-   # NEW: Resource Limits
-  memory = 16 # Limit to 64MB of RAM
+  # NEW: Resource Limits
+  memory     = 16  # Limit to 64MB of RAM
   cpu_shares = 512 # Limit CPU priority
-  
+
   ports {
     internal = 80
     external = 9000
