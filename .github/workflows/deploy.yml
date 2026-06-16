@@ -2,9 +2,9 @@ name: Aegis CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, project-aegis ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, project-aegis ]
 
 jobs:
   validate:
