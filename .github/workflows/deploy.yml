@@ -49,16 +49,20 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Terraform Init & Apply
+      - name: Start Docker (Local Runner)
         run: |
+          # Ensuring the runner can handle the Docker provider
           terraform init
           terraform apply -auto-approve
 
       - name: Run Health Check
         id: health_check
         run: |
-          # Replace localhost:9000 with your actual deployment URL if necessary
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:9000/health || echo "000")
+          # Port 9000 maps to internal 80 as per main.tf
+          # We use localhost since the container is running on the runner
+          echo "Waiting for container to stabilize..."
+          sleep 5
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:9000 || echo "000")
           echo "Health check returned $STATUS"
           if [ "$STATUS" -ne 200 ]; then
             echo "health_status=failed" >> $GITHUB_OUTPUT
@@ -69,5 +73,5 @@ jobs:
       - name: Automated Rebuild (Self-Healing)
         if: steps.health_check.outputs.health_status == 'failed'
         run: |
-          echo "Webserver unhealthy! Triggering automated rebuild..."
-          terraform apply -replace="aws_instance.web_server" -auto-approve
+          echo "Container unhealthy! Triggering automated rebuild..."
+          terraform apply -replace="docker_container.aegis_link_test" -auto-approve
